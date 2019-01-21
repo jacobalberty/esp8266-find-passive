@@ -2,8 +2,8 @@
 
 #include "functions.h"
 
-const char* ssid = "WIFI_SSID"
-const char* password = "WIFI_PASSWORD"
+const char* ssid = "WIFI_SSID";
+const char* password = "WIFI_PASSWORD";
 
 #define MAX_APS_TRACKED 50
 #define MAX_CLIENTS_TRACKED 100
