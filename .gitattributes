@@ -1,0 +1,9 @@
+# Manually classify the file types so that GitHub will label this as an Arduino project.
+*.ino text linguist-language=Arduino
+*.cpp text linguist-language=Arduino
+*.h text linguist-language=Arduino
+*.cmake text linguist-language=Arduino
+
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text eol=auto
+
