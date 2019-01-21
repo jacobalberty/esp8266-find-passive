@@ -1,9 +1,13 @@
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 
+#define ARDUINOJSON_USE_LONG_LONG 1
+#include <ArduinoJson.h>
+
 #include "functions.h"
 
 const char* ssid = "WIFI_SSID";
 const char* password = "WIFI_PASSWORD";
+const char* group = "FIND_GROUP";
 
 #define MAX_APS_TRACKED 50
 #define MAX_CLIENTS_TRACKED 100
@@ -31,6 +35,10 @@ void setup() {
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
 
   wifi_set_opmode(STATION_MODE);            // Promiscuous works only with station mode
   wifi_set_channel(channel);
@@ -84,10 +92,27 @@ void enableWifiClient()
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-  
-  Serial.print("Client seen count: ");
-  Serial.println(clients_known_count);
-//  for (int u = 0; u < clients_known_count; u++) print_client(clients_known[u]);
+
+  String request;
+
+  DynamicJsonBuffer jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+  root["node"] = String(ESP.getChipId());;
+  root["group"] = group;
+  root["timestamp"] = 0;
+  JsonArray& signals = root.createNestedArray("signals");
+
+  for (int u = 0; u < clients_known_count; u++) {
+    JsonObject& signal = signals.createNestedObject();
+    char macAddr[18];
+    uint8_t* mac = clients_known[u].station;
+    sprintf(macAddr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    signal["mac"] = macAddr;
+    signal["rssi"] = clients_known[u].rssi;
+  }
+  root.printTo(request);
+  Serial.println(request);
   memset(aps_known, 0, MAX_APS_TRACKED);
   aps_known_count = 0;
   memset(clients_known, 0, MAX_CLIENTS_TRACKED);
