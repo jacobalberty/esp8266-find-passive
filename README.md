@@ -21,3 +21,4 @@ I am posting it to assist anyone else working down the same path.
 6. OTA update support?
     * Need to stay under 468KB if I want OTA support
     * Possibly allow ota only on initial boot since this device won't be connected to wifi much and downtime isn't ideal during regular use.
+7. HTTPS support
