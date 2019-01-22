@@ -12,13 +12,12 @@ I am posting it to assist anyone else working down the same path.
 1. Post the client list to a specified find server/group
 2. Clean up code
     * Too many global variables
-3. Use [WifiManager](https://github.com/tzapu/WiFiManager) for initial setup.
-4. Speed up wifi connection
+3. Speed up wifi connection
     * Use static ip for reconnecting
     * Maybe use dhcp for initial connect and save ip address to reconnect
     * If using static ip will need to figure out some way to fail if the ip is lost
-5. Smarter algorithm for sniffing, I disabled the sniff a channel till no more data in favor of a hardcoded timer.
-6. OTA update support?
+4. Smarter algorithm for sniffing, I disabled the sniff a channel till no more data in favor of a hardcoded timer.
+5. OTA update support?
     * Need to stay under 468KB if I want OTA support
     * Possibly allow ota only on initial boot since this device won't be connected to wifi much and downtime isn't ideal during regular use.
-7. HTTPS support
+6. HTTPS support
