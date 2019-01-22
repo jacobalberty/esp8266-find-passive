@@ -2,18 +2,17 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
-#include <NTPClient.h>    //https://github.com/arduino-libraries/NTPClient
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
+
+#include <NTPClient.h>            //https://github.com/arduino-libraries/NTPClient
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 
 #define ARDUINOJSON_USE_LONG_LONG 1
-#include <ArduinoJson.h>
+#include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 
 #include "functions.h"
 
-const char* ssid = "WIFI_SSID";
-const char* password = "WIFI_PASSWORD";
 // note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
 String server = "lf.internalpositioning.com"; // find-lf
 //String server = "cloud.internalpositioning.com";
