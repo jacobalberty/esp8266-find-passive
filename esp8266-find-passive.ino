@@ -12,6 +12,7 @@ const char* group = "FIND_GROUP";
 
 #define MAX_APS_TRACKED 50
 #define MAX_CLIENTS_TRACKED 100
+#define MIN_CLIENTS_SEND 1
 
 #define disable 0
 #define enable  1
@@ -78,19 +79,23 @@ void loop() {
   currentMillis = millis();
 
   if (currentMillis - previousMillis >= interval) {
-    wifi_promiscuous_enable(disable);
-    enableWifiClient();
-    enableWifiMonitorMode();
- 
-  previousMillis = currentMillis;
-} else {
-  unsigned long newchannel = ((currentMillis - previousMillis) / intmult) + 1;
-  if (newchannel != channel) {
-    channel = newchannel;
-    wifi_set_channel(channel);
+    if (clients_known_count >= MIN_CLIENTS_SEND) {
+      wifi_promiscuous_enable(disable);
+      enableWifiClient();
+      enableWifiMonitorMode();
+    } else {
+      Serial.println("Haven't found enough clients to send, continuing monitor mode.");
+    }
+
+    previousMillis = currentMillis;
+  } else {
+    unsigned long newchannel = ((currentMillis - previousMillis) / intmult) + 1;
+    if (newchannel != channel) {
+      channel = newchannel;
+      wifi_set_channel(channel);
+    }
+    delay(1);
   }
-  delay(1);
-}
 }
 
 void enableWifiMonitorMode()

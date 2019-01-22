@@ -18,7 +18,6 @@ I am posting it to assist anyone else working down the same path.
     * Maybe use dhcp for initial connect and save ip address to reconnect
     * If using static ip will need to figure out some way to fail if the ip is lost
 5. Smarter algorithm for sniffing, I disabled the sniff a channel till no more data in favor of a hardcoded timer.
-6. Smarter algorithm for when to connect to wifi, right now it is definitely garbage and will connect whether or not theres data to push
-7. OTA update support?
+6. OTA update support?
     * Need to stay under 468KB if I want OTA support
     * Possibly allow ota only on initial boot since this device won't be connected to wifi much and downtime isn't ideal during regular use.
