@@ -13,6 +13,9 @@
 
 #include "functions.h"
 
+// Un-comment this for an experimental quick connect
+//#define WIFI_QUICK
+
 // note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
 String server = "lf.internalpositioning.com"; // find-lf
 //String server = "cloud.internalpositioning.com";
@@ -50,6 +53,16 @@ unsigned long previousMillis = 0;
 unsigned long intmult = interval / 14;
 unsigned long currentMillis;
 
+#ifdef WIFI_QUICK
+// Quick reconnect code
+struct {
+  uint8_t channel;
+  uint8_t ap_mac[6];
+  String ssid;
+  String psk;
+} wifiData;
+#endif
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -57,6 +70,13 @@ void setup() {
   WiFiManager wifiManager;
 
   wifiManager.autoConnect();
+
+#ifdef WIFI_QUICK
+  wifiData.ssid = WiFi.SSID();
+  wifiData.psk = WiFi.psk();
+  wifiData.channel = WiFi.channel();
+  memcpy(wifiData.ap_mac, WiFi.BSSID(), 6 );
+#endif
 
   wifi_set_opmode(STATION_MODE);            // Promiscuous works only with station mode
   wifi_set_channel(channel);
@@ -103,7 +123,13 @@ void enableWifiClient()
   Serial.println("Turning off wifi monitoring.");
   wifi_promiscuous_enable(false);
   WiFi.mode(WIFI_STA);
+#ifdef WIFI_QUICK
+  WiFi.persistent(false);
+  WiFi.begin(wifiData.ssid.c_str(), wifiData.psk.c_str(), wifiData.channel, wifiData.ap_mac, true);
+  WiFi.persistent(true);
+#else
   WiFi.begin();
+#endif
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -117,7 +143,6 @@ void enableWifiClient()
   String ts;
   http.begin(client, baseURL + "now");
   int res = http.GET();
-  Serial.println("Response: " + String(res));
   find3 = (res == 200);
   String timeResponse = http.getString();
   http.end();
