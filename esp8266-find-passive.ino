@@ -66,7 +66,6 @@ struct {
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  Serial.println("Hello...");
   WiFiManager wifiManager;
 
   wifiManager.autoConnect();
@@ -94,7 +93,7 @@ void loop() {
       enableWifiClient();
       enableWifiMonitorMode();
     } else {
-      Serial.println("Haven't found enough clients to send, continuing monitor mode.");
+      Serial.println(F("Haven't found enough clients to send, continuing monitor mode."));
     }
 
     previousMillis = currentMillis;
@@ -111,7 +110,7 @@ void loop() {
 void enableWifiMonitorMode()
 {
   // Send ESP into promiscuous mode. At this point, it stops being able to connect to the internet
-  Serial.println("Turning on wifi monitoring.");
+  Serial.println(F("Turning on wifi monitoring."));
   wifi_set_opmode(STATION_MODE);            // Promiscuous works only with station mode
   wifi_set_channel(channel);
   wifi_promiscuous_enable(enable);
@@ -120,7 +119,7 @@ void enableWifiMonitorMode()
 void enableWifiClient()
 {
   // Send ESP into promiscuous mode. At this point, it stops being able to connect to the internet
-  Serial.println("Turning off wifi monitoring.");
+  Serial.println(F("Turning off wifi monitoring."));
   wifi_promiscuous_enable(false);
   WiFi.mode(WIFI_STA);
 #ifdef WIFI_QUICK
@@ -135,12 +134,11 @@ void enableWifiClient()
     Serial.print(".");
   }
   Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  Serial.println(F("WiFi connected"));
   Serial.println(WiFi.localIP());
 
   if (!timeClient.update()) {
-    Serial.println("No NTP response so not sending data.");
+    Serial.println(F("No NTP response so not sending data."));
     return;
   }
 
