@@ -11,17 +11,17 @@
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 
+#include "FindPassive.h"
 #include "functions.h"
 
 // Un-comment this for an experimental quick connect
-//#define WIFI_QUICK
+#define WIFI_QUICK
 
 // note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
-String server = "lf.internalpositioning.com"; // find-lf
-//String server = "cloud.internalpositioning.com";
+const char *server = "lf.internalpositioning.com"; // find-lf
+//const char *server = "cloud.internalpositioning.com"; // find3
 const char* group = "FIND_GROUP";
 
-String baseURL = "http://" + server + "/";
 
 #define MAX_APS_TRACKED 50
 #define MAX_CLIENTS_TRACKED 100
@@ -139,26 +139,16 @@ void enableWifiClient()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  bool find3;
-  String ts;
-  http.begin(client, baseURL + "now");
-  int res = http.GET();
-  find3 = (res == 200);
-  String timeResponse = http.getString();
-  http.end();
-
-  if (find3) {
-    ts = timeResponse;
-  }
-  else {
-    if (!timeClient.update()) {
-      Serial.println("No NTP response so not sending data.");
-      return;
-    }
-    ts = String(timeClient.getEpochTime());
+  if (!timeClient.update()) {
+    Serial.println("No NTP response so not sending data.");
+    return;
   }
 
-  Serial.println(getJSON(find3, ts));
+  FindPassive findPassive = FindPassive(server, group, timeClient.getEpochTime());
+  for (int u = 0; u < clients_known_count; u++) {
+    findPassive.AddWifiSignal(mac2String(clients_known[u].station), clients_known[u].rssi);
+  }
+  Serial.println(findPassive.getJSON());
   clearSniffData();
 }
 
@@ -171,40 +161,9 @@ void clearSniffData() {
   probes_known_count = 0;
 }
 
-String getJSON(bool find3, String timestamp) {
-  String request;
-
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-
-  if (find3) {
-    root["d"] = String(ESP.getChipId());;
-    root["f"] = group;
-    root["t"] = timestamp;
-    JsonObject& signals = root.createNestedObject("s");
-    JsonObject& wifi = signals.createNestedObject("wifi");
-
-    for (int u = 0; u < clients_known_count; u++) {
-      wifi[mac2String(clients_known[u].station)] =  clients_known[u].rssi;
-    }
-  } else {
-    root["node"] = String(ESP.getChipId());;
-    root["group"] = group;
-    root["timestamp"] = timestamp;
-    JsonArray & signals = root.createNestedArray("signals");
-
-    for (int u = 0; u < clients_known_count; u++) {
-      JsonObject& signal = signals.createNestedObject();
-      signal["mac"] = mac2String(clients_known[u].station);
-      signal["rssi"] = clients_known[u].rssi;
-    }
-  }
-  root.printTo(request);
-  return request;
-}
-
-String mac2String(byte mac[]) {
+String mac2String(uint8_t mac[]) {
   char macAddr[18];
-  sprintf(macAddr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  snprintf(macAddr, sizeof(macAddr), "%02X:%02X:%02X:%02X:%02X:%02X",
+          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   return String(macAddr);
 }
