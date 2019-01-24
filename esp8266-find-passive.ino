@@ -18,8 +18,8 @@ String server = "lf.internalpositioning.com"; // find-lf
 //const char *server = "cloud.internalpositioning.com"; // find3
 String group = "FIND_GROUP";
 
-#define MAX_APS_TRACKED 50
-#define MAX_CLIENTS_TRACKED 100
+#define MAX_APS_TRACKED 10
+#define MAX_CLIENTS_TRACKED 50
 #define MIN_CLIENTS_SEND 1
 
 #define disable 0
