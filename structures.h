@@ -29,7 +29,7 @@ struct clientinfo
   int err;
   signed rssi;
   uint16_t seq_n;
-/* rpw additions */
+  /* rpw additions */
   uint8_t header;
   uint32_t last_heard;
   uint8_t reported;
@@ -46,7 +46,7 @@ struct probeinfo
   int err;
   signed rssi;
   uint16_t seq_n;
-/* rpw additions */
+  /* rpw additions */
   uint8_t header;
   uint32_t last_heard;
   uint8_t reported;
@@ -102,8 +102,8 @@ struct sniffer_buf2 {
   uint16_t len;
 };
 struct control_frame {
-   unsigned int ver :2; // protocol version (should be 0x0)
-   unsigned int type : 2; //0x0= Management, 0x1=Control, 0x2=Data
-   unsigned int subtype : 4;
+  unsigned int ver : 2; // protocol version (should be 0x0)
+  unsigned int type : 2; //0x0= Management, 0x1=Control, 0x2=Data
+  unsigned int subtype : 4;
 
 } ;
