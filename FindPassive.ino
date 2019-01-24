@@ -8,43 +8,14 @@
 #include <vector>
 
 FindPassive::FindPassive(String server, String group) {
-  init(server, group);
-}
-void FindPassive::init(String server, String group) {
-  WiFiClient client;
-  HTTPClient http;
   _group = group;
-
-  size_t found = server.indexOf("://");
-
-  if (found == -1) {
-    _server = "http://" + server;
-  } else if (server.substring(0, found) == "https") {
-    _server = server;
-    _ishttps = true;
-    Serial.println(F("https is not supported at this time"));
-#ifdef __EXCEPTIONS
-    throw 443;
-#endif
-  } else {
-    _server = server;
-  }
-  const char* headerNames[] = { "Location" };
-
-  http.begin(client, server + "/now");
-  http.collectHeaders(headerNames, sizeof(headerNames) / sizeof(headerNames[0]));
-
-  int res = http.GET();
-  if (http.hasHeader("Location"))  {
-    String newServer = http.header("Location");
-    init(newServer.substring(0, newServer.lastIndexOf("/now")), group);
-    return;
-  }
-
-  switch (res) {
+  _server = server;
+  HTTPRes http = getHttp("/now");
+  switch (http.rCode) {
     case 200: {
         _sVersion = 3;
-        _timestamp = atoi(http.getString().c_str());
+        String tst = http.body.substring(0, http.body.length()-4);
+        _timestamp = tst.toInt();
         break;
       }
     default: {
@@ -64,7 +35,6 @@ void FindPassive::init(String server, String group) {
         _timestamp = timeClient.getEpochTime();
       }
   }
-  http.end();
 }
 
 FindPassive::~FindPassive() {
@@ -104,5 +74,38 @@ String FindPassive::getJSON() {
   }
   root.printTo(request);
   return request;
+}
 
+HTTPRes FindPassive::getHttp(String url = "/") {
+  HTTPRes res;
+  WiFiClient client;
+  HTTPClient http;
+  const char* headerNames[] = { "Location" };
+
+  size_t found = _server.indexOf("://");
+
+  if (found == -1) {
+    _server = "http://" + _server;
+  } else if (_server.substring(0, found) == "https") {
+    _ishttps = true;
+    Serial.println(F("https is not supported at this time"));
+#ifdef __EXCEPTIONS
+    throw 443;
+#endif
+  }
+  res.url = _server + url;
+  http.begin(client, res.url);
+  http.collectHeaders(headerNames, sizeof(headerNames) / sizeof(headerNames[0]));
+
+  res.rCode = http.GET();
+  if (http.hasHeader("Location"))  {
+    String newServer = http.header("Location");
+    _server = newServer.substring(0, newServer.lastIndexOf(url));
+    http.end();
+    return getHttp(url);
+  }
+
+  res.body = http.getString();
+  http.end();
+  return res;
 }

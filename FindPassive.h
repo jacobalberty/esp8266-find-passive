@@ -3,6 +3,12 @@
 
 #include <vector>
 
+typedef struct HTTPRes {
+  String url;
+  String body;
+  int rCode;
+};
+
 typedef struct wifiSignal {
   String mac;
   int rssi;
@@ -15,8 +21,8 @@ class FindPassive {
     String getJSON();
     ~FindPassive();
   private:
-    void init(String server, String group);
-    unsigned short _sVersion;
+    HTTPRes getHttp(String url);
+    short _sVersion = -1;
     bool _ishttps;
     unsigned long _timestamp;
     String _server;
