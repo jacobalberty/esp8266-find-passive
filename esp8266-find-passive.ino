@@ -1,8 +1,12 @@
+#include "options.h"
+
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#ifdef WIFIMANAGER
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
 
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+#include <WiFiManager.h>
+#endif
 
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
@@ -10,22 +14,13 @@
 #include "FindPassive.h"
 #include "functions.h"
 
-// Un-comment this for an experimental quick connect
-//#define WIFI_QUICK
-
-// note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
-String server = "lf.internalpositioning.com"; // find-lf
-//const char *server = "cloud.internalpositioning.com"; // find3
-String group = "FIND_GROUP";
-
-#define MAX_APS_TRACKED 10
-#define MAX_CLIENTS_TRACKED 50
-#define MIN_CLIENTS_SEND 1
+String server = FIND_SERVER;
+String group = FIND_GROUP;
 
 #define disable 0
 #define enable  1
 
-const long interval = 10000;
+const long interval = SNIFF_INTERVAL;
 int nothing_new = 0;
 
 beaconinfo aps_known[MAX_APS_TRACKED];                    // Array to save MACs of known APs
@@ -54,9 +49,21 @@ struct {
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+#ifdef WIFIMANAGER
   WiFiManager wifiManager;
 
   wifiManager.autoConnect();
+#else
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PSK);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println(F("WiFi connected"));
+  Serial.println(WiFi.localIP());
+#endif
 
 #ifdef WIFI_QUICK
   wifiData.ssid = WiFi.SSID();
