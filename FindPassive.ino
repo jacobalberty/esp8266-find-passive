@@ -2,7 +2,6 @@
 #include <WiFiUdp.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
-
 #include <NTPClient.h>            //https://github.com/arduino-libraries/NTPClient
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
@@ -28,7 +27,7 @@ void FindPassive::init(String server, String group) {
     throw 443;
 #endif
   } else {
-    _server = server
+    _server = server;
   }
   const char* headerNames[] = { "Location" };
 
