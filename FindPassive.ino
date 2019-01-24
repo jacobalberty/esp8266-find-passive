@@ -24,6 +24,9 @@ void FindPassive::init(String server, String group) {
   } else if (server.substring(0, found) == "https") {
     _ishttps = true;
     Serial.println(F("https is not supported at this time"));
+#ifdef __EXCEPTIONS
+    throw 443;
+#endif
   }
   const char* headerNames[] = { "Location" };
 
@@ -36,7 +39,7 @@ void FindPassive::init(String server, String group) {
     init(newServer.substring(0, newServer.lastIndexOf("/now")), group);
     return;
   }
-  
+
   switch (res) {
     case 200: {
         _sVersion = 3;
