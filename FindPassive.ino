@@ -14,19 +14,21 @@ FindPassive::FindPassive(String server, String group) {
 void FindPassive::init(String server, String group) {
   WiFiClient client;
   HTTPClient http;
-  _server = server;
   _group = group;
 
   size_t found = server.indexOf("://");
 
   if (found == -1) {
-    server = "http://" + server;
+    _server = "http://" + server;
   } else if (server.substring(0, found) == "https") {
+    _server = server;
     _ishttps = true;
     Serial.println(F("https is not supported at this time"));
 #ifdef __EXCEPTIONS
     throw 443;
 #endif
+  } else {
+    _server = server
   }
   const char* headerNames[] = { "Location" };
 
