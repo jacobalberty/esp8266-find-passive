@@ -7,38 +7,19 @@
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 #include <vector>
 
-FindPassive::FindPassive(String server, String group) {
+FindPassive::FindPassive(String server, String group, short sVersion) {
   _group = group;
   _server = server;
-  HTTPRes http = getHttp("/now");
-  switch (http.rCode) {
-    case 200: {
-        _sVersion = 3;
-        String tst = http.body.substring(0, http.body.length()-4);
-        _timestamp = tst.toInt();
-        break;
-      }
-    default: {
-        WiFiUDP ntpUDP;
-        NTPClient timeClient(ntpUDP);
-
-        _sVersion = 2;
-        timeClient.begin();
-        unsigned long startMillis = millis();
-        unsigned long currentMillis = startMillis;
-        while (!timeClient.update()) {
-          currentMillis = millis();
-          if (currentMillis - startMillis >= 1000) {
-            break;
-          }
-        }
-        _timestamp = timeClient.getEpochTime();
-      }
+  if (sVersion == -1) {
+    HTTPRes http = getHttp("/now"); // Try a URL that only exists in find3
+    _sVersion = http.rCode == 200 ? 3 : 2;
+  } else {
+    _sVersion = sVersion;
   }
 }
-
 FindPassive::~FindPassive() {
 }
+
 void FindPassive::AddWifiSignal(String mac, int rssi) {
   _wifiSignals.push_back({mac, rssi});
 }
@@ -51,7 +32,7 @@ String FindPassive::getJSON() {
     case 2: {
         root["node"] = String(ESP.getChipId());
         root["group"] = group;
-        root["timestamp"] = _timestamp;
+        root["timestamp"] = getTimestamp();
         JsonArray& signals = root.createNestedArray("signals");
         for (wifiSignal s : _wifiSignals) {
           JsonObject& signal = signals.createNestedObject();
@@ -63,7 +44,7 @@ String FindPassive::getJSON() {
     case 3: {
         root["d"] = String(ESP.getChipId());
         root["f"] = group;
-        root["t"] = _timestamp;
+        root["t"] = getTimestamp();
         JsonObject& signals = root.createNestedObject("s");
         JsonObject& wifi = signals.createNestedObject("wifi");
         for (wifiSignal s : _wifiSignals) {
@@ -108,4 +89,33 @@ HTTPRes FindPassive::getHttp(String url = "/") {
   res.body = http.getString();
   http.end();
   return res;
+}
+
+unsigned long FindPassive::getTimestamp() {
+  switch (_sVersion) {
+    case 3: {
+        HTTPRes http = getHttp("/now");
+        String tst = http.body.substring(0, http.body.length() - 4);
+        return tst.toInt();
+        break;
+      }
+    case 2:
+    default: {
+        WiFiUDP ntpUDP;
+        NTPClient timeClient(ntpUDP);
+
+        _sVersion = 2;
+        timeClient.begin();
+        unsigned long startMillis = millis();
+        unsigned long currentMillis = startMillis;
+        while (!timeClient.update()) {
+          currentMillis = millis();
+          if (currentMillis - startMillis >= 1000) {
+            break;
+          }
+        }
+        return timeClient.getEpochTime();
+        break;
+      }
+  }
 }

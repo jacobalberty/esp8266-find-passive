@@ -16,15 +16,15 @@ typedef struct wifiSignal {
 
 class FindPassive {
   public:
-    FindPassive(String server, String group);
+    FindPassive(String server, String group, short sVersion = -1);
     void AddWifiSignal(String mac, int rssi);
     String getJSON();
     ~FindPassive();
   private:
     HTTPRes getHttp(String url);
+    unsigned long getTimestamp();
     short _sVersion = -1;
     bool _ishttps;
-    unsigned long _timestamp;
     String _server;
     String _group;
     std::vector<wifiSignal> _wifiSignals;

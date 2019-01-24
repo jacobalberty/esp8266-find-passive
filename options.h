@@ -14,6 +14,7 @@
 #define FIND_SERVER "lf.internalpositioning.com" // find-lf
 //#define FIND_SERVER "cloud.internalpositioning.com" // find3
 #define FIND_GROUP "FIND_GROUP"
+//#define FIND_VERSION 3 // Use to turn off version autodetection and manually specificy server version
 
 #define MAX_APS_TRACKED 10
 #define MAX_CLIENTS_TRACKED 50

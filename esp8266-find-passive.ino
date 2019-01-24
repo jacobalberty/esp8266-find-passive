@@ -133,8 +133,11 @@ void enableWifiClient()
   Serial.println("");
   Serial.println(F("WiFi connected"));
   Serial.println(WiFi.localIP());
-
+#ifdef FIND_VERSION
+  FindPassive findPassive = FindPassive(server, group, FIND_VERSION);
+#else
   FindPassive findPassive = FindPassive(server, group);
+#endif
   for (int u = 0; u < clients_known_count; u++) {
     findPassive.AddWifiSignal(mac2String(clients_known[u].station), clients_known[u].rssi);
   }
