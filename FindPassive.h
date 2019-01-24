@@ -10,16 +10,17 @@ typedef struct wifiSignal {
 
 class FindPassive {
   public:
-    FindPassive(const char* server, const char *group, unsigned long timestamp);
+    FindPassive(String server, String group);
     void AddWifiSignal(char *mac, int rssi);
     String getJSON();
     ~FindPassive();
   private:
+    void init(String server, String group);
     unsigned short _sVersion;
     bool _ishttps;
     unsigned long _timestamp;
-    const char *_server;
-    const char *_group;
+    String _server;
+    String _group;
     std::vector<wifiSignal> _wifiSignals;
 };
 #endif

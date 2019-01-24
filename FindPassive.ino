@@ -1,13 +1,68 @@
 #include "FindPassive.h"
+#include <WiFiUdp.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 
+#include <NTPClient.h>            //https://github.com/arduino-libraries/NTPClient
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 #include <vector>
-FindPassive::FindPassive(const char *server, const char *group, unsigned long timestamp) {
-  _sVersion = 2;
+
+FindPassive::FindPassive(String server, String group) {
+  init(server, group);
+}
+void FindPassive::init(String server, String group) {
+  WiFiClient client;
+  HTTPClient http;
   _server = server;
   _group = group;
-  _timestamp = timestamp;
+
+  size_t found = server.indexOf("://");
+
+  if (found == -1) {
+    server = "http://" + server;
+  } else if (server.substring(0, found) == "https") {
+    _ishttps = true;
+    Serial.println(server);
+    Serial.println(F("https is not supported at this time"));
+    throw 443;
+  }
+  const char* headerNames[] = { "Location" };
+
+  http.begin(client, server + "/now");
+  http.collectHeaders(headerNames, sizeof(headerNames) / sizeof(headerNames[0]));
+
+  int res = http.GET();
+  if (http.hasHeader("Location"))  {
+    String newServer = http.header("Location");
+    init(newServer.substring(0, newServer.lastIndexOf("/now")), group);
+    return;
+  }
+  
+  switch (res) {
+    case 200: {
+        _sVersion = 3;
+        _timestamp = atoi(http.getString().c_str());
+        break;
+      }
+    default: {
+        WiFiUDP ntpUDP;
+        NTPClient timeClient(ntpUDP);
+
+        _sVersion = 2;
+        timeClient.begin();
+        unsigned long startMillis = millis();
+        unsigned long currentMillis = startMillis;
+        while (!timeClient.update()) {
+          currentMillis = millis();
+          if (currentMillis - startMillis >= 1000) {
+            break;
+          }
+        }
+        _timestamp = timeClient.getEpochTime();
+      }
+  }
+  http.end();
 }
 
 FindPassive::~FindPassive() {

@@ -1,11 +1,7 @@
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-#include <ESP8266HTTPClient.h>
-#include <WiFiClient.h>
-#include <WiFiUdp.h>
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
 
-#include <NTPClient.h>            //https://github.com/arduino-libraries/NTPClient
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 
 #define ARDUINOJSON_USE_LONG_LONG 1
@@ -15,13 +11,13 @@
 #include "functions.h"
 
 // Un-comment this for an experimental quick connect
-#define WIFI_QUICK
+//#define WIFI_QUICK
 
+String server = "192.168.90.80:8003";
 // note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
-const char *server = "lf.internalpositioning.com"; // find-lf
+//String server = "lf.internalpositioning.com"; // find-lf
 //const char *server = "cloud.internalpositioning.com"; // find3
-const char* group = "FIND_GROUP";
-
+String group = "FIND_GROUP";
 
 #define MAX_APS_TRACKED 50
 #define MAX_CLIENTS_TRACKED 100
@@ -30,7 +26,6 @@ const char* group = "FIND_GROUP";
 #define disable 0
 #define enable  1
 
-bool first = true;
 const long interval = 10000;
 int nothing_new = 0;
 
@@ -42,12 +37,6 @@ clientinfo clients_known[MAX_CLIENTS_TRACKED];            // Array to save MACs 
 int clients_known_count = 0;                              // Number of known CLIENTs
 
 unsigned int channel = 1;
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
-
-WiFiClient client;
-HTTPClient http;
 
 unsigned long previousMillis = 0;
 unsigned long intmult = interval / 14;
@@ -137,12 +126,7 @@ void enableWifiClient()
   Serial.println(F("WiFi connected"));
   Serial.println(WiFi.localIP());
 
-  if (!timeClient.update()) {
-    Serial.println(F("No NTP response so not sending data."));
-    return;
-  }
-
-  FindPassive findPassive = FindPassive(server, group, timeClient.getEpochTime());
+  FindPassive findPassive = FindPassive(server, group);
   for (int u = 0; u < clients_known_count; u++) {
     findPassive.AddWifiSignal(mac2String(clients_known[u].station), clients_known[u].rssi);
   }
