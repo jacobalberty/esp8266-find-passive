@@ -4,14 +4,14 @@
 #include <vector>
 
 typedef struct wifiSignal {
-  char *mac;
+  String mac;
   int rssi;
 };
 
 class FindPassive {
   public:
     FindPassive(String server, String group);
-    void AddWifiSignal(char *mac, int rssi);
+    void AddWifiSignal(String mac, int rssi);
     String getJSON();
     ~FindPassive();
   private:

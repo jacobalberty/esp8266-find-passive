@@ -23,9 +23,7 @@ void FindPassive::init(String server, String group) {
     server = "http://" + server;
   } else if (server.substring(0, found) == "https") {
     _ishttps = true;
-    Serial.println(server);
     Serial.println(F("https is not supported at this time"));
-    throw 443;
   }
   const char* headerNames[] = { "Location" };
 
@@ -67,7 +65,7 @@ void FindPassive::init(String server, String group) {
 
 FindPassive::~FindPassive() {
 }
-void FindPassive::AddWifiSignal(char *mac, int rssi) {
+void FindPassive::AddWifiSignal(String mac, int rssi) {
   _wifiSignals.push_back({mac, rssi});
 }
 
@@ -95,6 +93,7 @@ String FindPassive::getJSON() {
         JsonObject& signals = root.createNestedObject("s");
         JsonObject& wifi = signals.createNestedObject("wifi");
         for (wifiSignal s : _wifiSignals) {
+          Serial.println("add: " + String(s.mac) + " = " + String(s.rssi));
           wifi[s.mac] = s.rssi;
         }
         break;

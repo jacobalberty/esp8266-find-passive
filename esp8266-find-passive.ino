@@ -13,9 +13,8 @@
 // Un-comment this for an experimental quick connect
 //#define WIFI_QUICK
 
-String server = "192.168.90.80:8003";
 // note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
-//String server = "lf.internalpositioning.com"; // find-lf
+String server = "lf.internalpositioning.com"; // find-lf
 //const char *server = "cloud.internalpositioning.com"; // find3
 String group = "FIND_GROUP";
 
@@ -81,6 +80,8 @@ void loop() {
       wifi_promiscuous_enable(disable);
       enableWifiClient();
       enableWifiMonitorMode();
+      Serial.print("Free heap: ");
+      Serial.println(ESP.getFreeHeap());
     } else {
       Serial.println(F("Haven't found enough clients to send, continuing monitor mode."));
     }
@@ -143,7 +144,7 @@ void clearSniffData() {
   probes_known_count = 0;
 }
 
-char* mac2String(uint8_t mac[]) {
+String mac2String(uint8_t mac[]) {
   static char macAddr[18];
 
   if (mac == NULL) return "";
@@ -151,5 +152,5 @@ char* mac2String(uint8_t mac[]) {
   snprintf(macAddr, sizeof(macAddr), "%02X:%02X:%02X:%02X:%02X:%02X",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
           
-  return macAddr;
+  return String(macAddr);
 }
