@@ -12,7 +12,7 @@ FindPassive::FindPassive(const char *server, const char *group, unsigned long ti
 
 FindPassive::~FindPassive() {
 }
-void FindPassive::AddWifiSignal(String mac, int rssi) {
+void FindPassive::AddWifiSignal(char *mac, int rssi) {
   _wifiSignals.push_back({mac, rssi});
 }
 

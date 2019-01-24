@@ -159,9 +159,13 @@ void clearSniffData() {
   probes_known_count = 0;
 }
 
-String mac2String(uint8_t mac[]) {
-  char macAddr[18];
+char* mac2String(uint8_t mac[]) {
+  static char macAddr[18];
+
+  if (mac == NULL) return "";
+  
   snprintf(macAddr, sizeof(macAddr), "%02X:%02X:%02X:%02X:%02X:%02X",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  return String(macAddr);
+          
+  return macAddr;
 }
