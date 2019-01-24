@@ -93,7 +93,6 @@ String FindPassive::getJSON() {
         JsonObject& signals = root.createNestedObject("s");
         JsonObject& wifi = signals.createNestedObject("wifi");
         for (wifiSignal s : _wifiSignals) {
-          Serial.println("add: " + String(s.mac) + " = " + String(s.rssi));
           wifi[s.mac] = s.rssi;
         }
         break;
