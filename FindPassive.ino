@@ -63,6 +63,21 @@ String FindPassive::getJSON() {
   return request;
 }
 
+HTTPRes FindPassive::sendData() {
+  HTTPRes res;
+  HTTPClient http;
+  WiFiClient client;
+
+  res.url = _server + "/passive";
+  http.begin(client, res.url);
+  http.addHeader("Content-Type", "application/json");
+  res.rCode = http.POST(getJSON());
+//  res.body = http.getString();
+  http.end();
+
+  return res;
+}
+
 HTTPRes FindPassive::getHttp(String url = "/") {
   HTTPRes res;
   WiFiClient client;

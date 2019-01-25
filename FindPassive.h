@@ -19,6 +19,7 @@ class FindPassive {
     FindPassive(String server, String group, short sVersion = -1);
     void AddWifiSignal(String mac, int rssi);
     String getJSON();
+    HTTPRes sendData();
     ~FindPassive();
   private:
     HTTPRes getHttp(String url);

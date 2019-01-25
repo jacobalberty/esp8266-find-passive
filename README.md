@@ -4,12 +4,21 @@
 This is an attempt at a [find-lf](https://github.com/schollz/find-lf) source using a single esp8266.
 It is based on code from [esp8266mini-sniff](https://github.com/rw950431/ESP8266mini-sniff).
 
+## Dependencies
+* [WiFiManager](https://github.com/tzapu/WiFiManager)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+* [NTPClient](https://github.com/arduino-libraries/NTPClient) (Optional only needed if you enable INCLUDE_TIMESTAMP)
+
 ## Usage
-This doesn't do anything other than sniff for a few seconds, then connect to wifi and display the generated json over the serial line.
-I am posting it to assist anyone else working down the same path.
+To use this you will will need to install all of the dependencies, then edit options.h.
+At a minimum in options.h you will need to set FIND_SERVER and FIND_GROUP.
+Currently the public servers DO NOT work as this does not yet support https.
+Once you have the settings configured, compile and upload. If you do not have any valid wireless settings saved yet
+WiFiManager will launch, you simply look for an SSID named "ESP" followed by a bunch of numbers, connect to it and the captive portal will
+guide you through connecting.
 
 ## Todo
-1. Post the client list to a specified find server/group
+1. HTTPS support
 2. Clean up code
     * Too many global variables
 3. Speed up wifi connection
@@ -20,4 +29,4 @@ I am posting it to assist anyone else working down the same path.
 5. OTA update support?
     * Need to stay under 468KB if I want OTA support
     * Possibly allow ota only on initial boot since this device won't be connected to wifi much and downtime isn't ideal during regular use.
-6. HTTPS support
+

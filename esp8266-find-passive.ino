@@ -141,7 +141,7 @@ void enableWifiClient()
   for (int u = 0; u < clients_known_count; u++) {
     findPassive.AddWifiSignal(mac2String(clients_known[u].station), clients_known[u].rssi);
   }
-  Serial.println(findPassive.getJSON());
+  HTTPRes hres = findPassive.sendData();
   clearSniffData();
 }
 
