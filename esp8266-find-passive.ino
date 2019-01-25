@@ -8,9 +8,6 @@
 #include <WiFiManager.h>
 #endif
 
-#define ARDUINOJSON_USE_LONG_LONG 1
-#include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
-
 #include "FindPassive.h"
 #include "functions.h"
 
