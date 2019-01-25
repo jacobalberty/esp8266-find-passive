@@ -19,6 +19,7 @@ guide you through connecting, be sure to change the find server and group as the
 
 ## Todo
 1. HTTPS support
+    * An alternative would be to use MQTT if a passive scan submission endpoint is added on the MQTT side of things.
 2. Clean up code
     * Too many global variables
 3. Speed up wifi connection
