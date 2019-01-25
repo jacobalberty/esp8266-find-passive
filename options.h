@@ -13,8 +13,8 @@
 #define WIFI_PSK "WIFI_PSK"
 
 // note, ESP8266HTTPClient does not support https so the public servers do not work at this time.
-#define FIND_SERVER "lf.internalpositioning.com" // find-lf
-//#define FIND_SERVER "cloud.internalpositioning.com" // find3
+//#define FIND_SERVER "lf.internalpositioning.com" // find-lf
+#define FIND_SERVER "cloud.internalpositioning.com" // find3
 #define FIND_GROUP "FIND_GROUP"
 //#define FIND_VERSION 3 // Use to turn off version autodetection and manually specificy server version
 #define FIND_NODE String(ESP.getChipId()) // Needs to be unique to the device and stay the same.
