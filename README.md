@@ -13,7 +13,7 @@ It is based on code from [esp8266mini-sniff](https://github.com/rw950431/ESP8266
 To use this you will will need to install all of the dependencies, then edit options.h.
 At a minimum in options.h you will need to set FIND_SERVER and FIND_GROUP.
 Currently the public servers DO NOT work as this does not yet support https.
-Once you have the settings configured, compile and upload. If you do not have any valid wireless settings saved yet
+Once you have the settings configured, compile and upload using the Arduino IDE. If you do not have any valid wireless settings saved yet
 WiFiManager will launch, you simply look for an SSID named "ESP" followed by a bunch of numbers, connect to it and the captive portal will
 guide you through connecting.
 
