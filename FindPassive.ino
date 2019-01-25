@@ -33,7 +33,7 @@ String FindPassive::getJSON() {
   switch (_sVersion) {
     case 2: {
         root["node"] = FIND_NODE;
-        root["group"] = group;
+        root["group"] = _group;
 #ifdef INCLUDE_TIMESTAMP
         root["timestamp"] = getTimestamp();
 #endif
@@ -47,7 +47,7 @@ String FindPassive::getJSON() {
       }
     case 3: {
         root["d"] = FIND_NODE;
-        root["f"] = group;
+        root["f"] = _group;
 #ifdef INCLUDE_TIMESTAMP
         root["t"] = getTimestamp();
 #endif
