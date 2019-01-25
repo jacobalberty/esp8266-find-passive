@@ -1,18 +1,22 @@
 #include "options.h"
-
+#ifdef WIFIMANAGER
+#include <FS.h>                   //this needs to be first, or it all crashes and burns...
+#endif
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #ifdef WIFIMANAGER
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
 
 #include <WiFiManager.h>
+#define ARDUINOJSON_USE_LONG_LONG 1
+#include <ArduinoJson.h>
 #endif
 
 #include "FindPassive.h"
 #include "functions.h"
 
-String server = FIND_SERVER;
-String group = FIND_GROUP;
+String find_server = FIND_SERVER;
+String find_group = FIND_GROUP;
 
 #define disable 0
 #define enable  1
@@ -43,13 +47,83 @@ struct {
 } wifiData;
 #endif
 
+
+#ifdef WIFIMANAGER
+//flag for saving data
+bool shouldSaveConfig = false;
+#endif
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
 #ifdef WIFIMANAGER
+  //read configuration from FS json
+  Serial.println("mounting FS...");
+
+  if (SPIFFS.begin()) {
+    Serial.println("mounted file system");
+    if (SPIFFS.exists("/config.json")) {
+      //file exists, reading and loading
+      Serial.println("reading config file");
+      File configFile = SPIFFS.open("/config.json", "r");
+      if (configFile) {
+        Serial.println("opened config file");
+        size_t size = configFile.size();
+        // Allocate a buffer to store contents of the file.
+        std::unique_ptr<char[]> buf(new char[size]);
+
+        configFile.readBytes(buf.get(), size);
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& json = jsonBuffer.parseObject(buf.get());
+        json.printTo(Serial);
+        if (json.success()) {
+          Serial.println("\nparsed json");
+
+          find_server = json["find_server"].asString();
+          find_group = json["find_group"].asString();
+        } else {
+          Serial.println("failed to load json config");
+        }
+        configFile.close();
+      }
+    }
+  } else {
+    Serial.println("failed to mount FS");
+  }
+
+  WiFiManagerParameter custom_find_server("server", "find server", find_server.c_str(), 40);
+  WiFiManagerParameter custom_find_group("group", "find group", find_group.c_str(), 40);
+
   WiFiManager wifiManager;
 
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+  wifiManager.addParameter(&custom_find_server);
+  wifiManager.addParameter(&custom_find_group);
+
   wifiManager.autoConnect();
+
+  find_server = custom_find_server.getValue();
+  find_group = custom_find_group.getValue();
+
+  //save the custom parameters to FS
+  if (shouldSaveConfig) {
+    Serial.println("saving config");
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
+    json["find_server"] = find_server;
+    json["find_group"] = find_group;
+
+    File configFile = SPIFFS.open("/config.json", "w");
+    if (!configFile) {
+      Serial.println("failed to open config file for writing");
+    }
+
+    json.printTo(Serial);
+    json.printTo(configFile);
+    configFile.close();
+    //end save
+  }
 #else
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PSK);
@@ -101,6 +175,14 @@ void loop() {
   }
 }
 
+#ifdef WIFIMANAGER
+//callback notifying us of the need to save config
+void saveConfigCallback () {
+  Serial.println("Should save config");
+  shouldSaveConfig = true;
+}
+#endif
+
 void enableWifiMonitorMode()
 {
   // Send ESP into promiscuous mode. At this point, it stops being able to connect to the internet
@@ -131,9 +213,9 @@ void enableWifiClient()
   Serial.println(F("WiFi connected"));
   Serial.println(WiFi.localIP());
 #ifdef FIND_VERSION
-  FindPassive findPassive = FindPassive(server, group, FIND_VERSION);
+  FindPassive findPassive = FindPassive(find_server, find_group, FIND_VERSION);
 #else
-  FindPassive findPassive = FindPassive(server, group);
+  FindPassive findPassive = FindPassive(find_server, find_group);
 #endif
   for (int u = 0; u < clients_known_count; u++) {
     findPassive.AddWifiSignal(mac2String(clients_known[u].station), clients_known[u].rssi);

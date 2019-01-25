@@ -10,12 +10,12 @@ It is based on code from [esp8266mini-sniff](https://github.com/rw950431/ESP8266
 * [NTPClient](https://github.com/arduino-libraries/NTPClient) (Optional only needed if you enable INCLUDE_TIMESTAMP)
 
 ## Usage
-To use this you will will need to install all of the dependencies, then edit options.h.
-At a minimum in options.h you will need to set FIND_SERVER and FIND_GROUP.
+To use this you will will need to install all of the dependencies.
 Currently the public servers DO NOT work as this does not yet support https.
-Once you have the settings configured, compile and upload using the Arduino IDE. If you do not have any valid wireless settings saved yet
+In the arduino IDE select a flash size that includes at least 32k spiffs.
+compile and upload using the Arduino IDE. If you do not have any valid wireless settings saved yet
 WiFiManager will launch, you simply look for an SSID named "ESP" followed by a bunch of numbers, connect to it and the captive portal will
-guide you through connecting.
+guide you through connecting, be sure to change the find server and group as the public servers do not currently work since we don't (yet) support https.
 
 ## Todo
 1. HTTPS support
