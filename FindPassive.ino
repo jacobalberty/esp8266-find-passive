@@ -1,8 +1,10 @@
 #include "FindPassive.h"
-#include <WiFiUdp.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
+#ifdef INCLUDE_TIMESTAMP
 #include <NTPClient.h>            //https://github.com/arduino-libraries/NTPClient
+#include <WiFiUdp.h>
+#endif
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 #include <vector>
@@ -30,9 +32,11 @@ String FindPassive::getJSON() {
   JsonObject& root = jsonBuffer.createObject();
   switch (_sVersion) {
     case 2: {
-        root["node"] = String(ESP.getChipId());
+        root["node"] = FIND_NODE;
         root["group"] = group;
+#ifdef INCLUDE_TIMESTAMP
         root["timestamp"] = getTimestamp();
+#endif
         JsonArray& signals = root.createNestedArray("signals");
         for (wifiSignal s : _wifiSignals) {
           JsonObject& signal = signals.createNestedObject();
@@ -42,9 +46,11 @@ String FindPassive::getJSON() {
         break;
       }
     case 3: {
-        root["d"] = String(ESP.getChipId());
+        root["d"] = FIND_NODE;
         root["f"] = group;
+#ifdef INCLUDE_TIMESTAMP
         root["t"] = getTimestamp();
+#endif
         JsonObject& signals = root.createNestedObject("s");
         JsonObject& wifi = signals.createNestedObject("wifi");
         for (wifiSignal s : _wifiSignals) {
@@ -91,6 +97,7 @@ HTTPRes FindPassive::getHttp(String url = "/") {
   return res;
 }
 
+#ifdef INCLUDE_TIMESTAMP
 unsigned long FindPassive::getTimestamp() {
   switch (_sVersion) {
     case 3: {
@@ -119,3 +126,4 @@ unsigned long FindPassive::getTimestamp() {
       }
   }
 }
+#endif

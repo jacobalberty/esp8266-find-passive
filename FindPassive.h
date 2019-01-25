@@ -22,7 +22,9 @@ class FindPassive {
     ~FindPassive();
   private:
     HTTPRes getHttp(String url);
+#ifdef INCLUDE_TIMESTAMP
     unsigned long getTimestamp();
+#endif
     short _sVersion = -1;
     bool _ishttps;
     String _server;
