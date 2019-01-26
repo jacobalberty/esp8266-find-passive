@@ -26,7 +26,11 @@ guide you through connecting, be sure to change the find server and group as the
     * Use static ip for reconnecting
     * Maybe use dhcp for initial connect and save ip address to reconnect
     * If using static ip will need to figure out some way to fail if the ip is lost
-4. Smarter algorithm for sniffing, I disabled the sniff a channel till no more data in favor of a hardcoded timer.
+4. Improve sniffer.
+    * Right now the sniffer is just esp8266mini-sniff and approximately every 10 seconds we empty out its array to push to the server
+    * Ideally we would use a sniffer written specifically to interface with the FindPassive class, this would require some extensions to FindPassive
+        * The ability to delete old data
+        * The ability to see if a client is already listed.
 5. OTA update support?
     * Need to stay under 468KB if I want OTA support
     * Possibly allow ota only on initial boot since this device won't be connected to wifi much and downtime isn't ideal during regular use.
