@@ -64,15 +64,16 @@ String FindPassive::getJSON() {
 }
 
 HTTPRes FindPassive::sendData() {
+  HTTPUrl purl = parseURL(_server + "/passive");
   HTTPRes res;
   HTTPClient http;
   WiFiClient client;
 
-  res.url = _server + "/passive";
-  http.begin(client, res.url);
+  res.url = purl.proto + "://" + purl.host + ":" + String(purl.port) + purl.path;
+
+  http.begin(client, purl.host, purl.port, purl.path);
   http.addHeader("Content-Type", "application/json");
   res.rCode = http.POST(getJSON());
-//  res.body = http.getString();
   http.end();
 
   return res;
@@ -80,23 +81,21 @@ HTTPRes FindPassive::sendData() {
 
 HTTPRes FindPassive::getHttp(String url = "/") {
   HTTPRes res;
+  HTTPUrl purl = parseURL(_server + url);
   WiFiClient client;
   HTTPClient http;
   const char* headerNames[] = { "Location" };
 
-  size_t found = _server.indexOf("://");
 
-  if (found == -1) {
-    _server = "http://" + _server;
-  } else if (_server.substring(0, found) == "https") {
+  if (purl.proto == "https") {
     _ishttps = true;
     Serial.println(F("https is not supported at this time"));
 #ifdef __EXCEPTIONS
     throw 443;
 #endif
   }
-  res.url = _server + url;
-  http.begin(client, res.url);
+  res.url = purl.proto + "://" + purl.host + ":" + String(purl.port) + purl.path;
+  http.begin(client, purl.host, purl.port, purl.path);
   http.collectHeaders(headerNames, sizeof(headerNames) / sizeof(headerNames[0]));
 
   res.rCode = http.GET();
@@ -109,6 +108,44 @@ HTTPRes FindPassive::getHttp(String url = "/") {
 
   res.body = http.getString();
   http.end();
+  return res;
+}
+
+HTTPUrl FindPassive::parseURL(String url) {
+  String tmp;
+  HTTPUrl res;
+  size_t found;
+
+  // Determine protocol
+  found = url.indexOf("://");
+  if (found == -1) {
+    res.proto = "http";
+    tmp = url;
+  } else {
+    res.proto = url.substring(0, found);
+    tmp = url.substring(found + 3);
+  }
+
+  // Determine path
+  found = tmp.indexOf("/");
+  if (found == -1) {
+    res.host = tmp;
+  } else {
+    res.host = tmp.substring(0, found);
+    res.path = tmp.substring(found);
+  }
+
+  // Determine port
+  found = res.host.indexOf(":");
+  if (found == -1) {
+    if (res.proto == "https")
+      res.port = 443;
+    else
+      res.port = 80;
+  } else {
+    res.port = res.host.substring(found + 1).toInt();
+    res.host = res.host.substring(0, found);
+  }
   return res;
 }
 

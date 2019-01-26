@@ -3,6 +3,13 @@
 
 #include <vector>
 
+typedef struct HTTPUrl {
+  String proto;
+  String host;
+  String path;
+  uint16_t port;
+};
+
 typedef struct HTTPRes {
   String url;
   String body;
@@ -23,6 +30,7 @@ class FindPassive {
     ~FindPassive();
   private:
     HTTPRes getHttp(String url);
+    HTTPUrl parseURL(String url);
 #ifdef INCLUDE_TIMESTAMP
     unsigned long getTimestamp();
 #endif
