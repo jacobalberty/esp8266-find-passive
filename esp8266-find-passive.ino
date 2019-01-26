@@ -237,6 +237,8 @@ void enableWifiClient()
     findPassive.AddWifiSignal(mac2String(clients_known[u].station), clients_known[u].rssi);
   }
   HTTPRes hres = findPassive.sendData();
+  DPRINT("POST response code: ");
+  DPRINTLN(hres.rCode);
   clearSniffData();
 }
 
