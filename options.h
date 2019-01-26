@@ -21,8 +21,8 @@
 //#define FIND_VERSION 3 // Use to turn off version autodetection and manually specificy server version
 #define FIND_NODE String(ESP.getChipId()) // Needs to be unique to the device and stay the same.
 
-#define MAX_APS_TRACKED 10
-#define MAX_CLIENTS_TRACKED 50
+#define MAX_APS_TRACKED 25
+#define MAX_CLIENTS_TRACKED 75
 #define MIN_CLIENTS_SEND 1
 #define SNIFF_INTERVAL 10000
 

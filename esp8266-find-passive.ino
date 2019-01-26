@@ -177,12 +177,17 @@ void loop() {
 
     previousMillis = millis();
   } else {
-    unsigned long newchannel = ((currentMillis - previousMillis) / intmult) + 1;
-    if (newchannel != channel) {
-      channel = newchannel;
-      wifi_set_channel(channel);
+    channel = 1;
+    while (true) {
+      nothing_new++;                          // Array is not finite, check bounds and adjust if required
+      if (nothing_new > 200) {
+        nothing_new = 0;
+        channel++;
+        if (channel == 15) break;             // Only scan channels 1 to 14
+        wifi_set_channel(channel);
+      }
+      delay(1);  // critical processing timeslice for NONOS SDK! No delay(0) yield()
     }
-    delay(1);
   }
 }
 
