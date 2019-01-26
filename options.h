@@ -7,6 +7,8 @@
 //#define WIFI_QUICK
 // Un-comment this to include timestamp with submission
 //#define INCLUDE_TIMESTAMP
+// Un-comment to include debug information
+//#define DEBUG
 
 // Used if WiFiManager disabled
 #define WIFI_SSID "WIFI_SSID"

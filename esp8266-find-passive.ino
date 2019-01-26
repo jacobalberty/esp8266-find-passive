@@ -12,6 +12,14 @@
 #include <ArduinoJson.h>
 #endif
 
+#ifdef DEBUG
+#define DPRINT(x) Serial.print(x)
+#define DPRINTLN(x) Serial.println(x)
+#else
+#define DPRINT(x)
+#define DPRINTLN(x)
+#endif
+
 #include "FindPassive.h"
 #include "functions.h"
 
@@ -58,16 +66,16 @@ void setup() {
   Serial.begin(115200);
 #ifdef WIFIMANAGER
   //read configuration from FS json
-  Serial.println("mounting FS...");
+  DPRINTLN("mounting FS...");
 
   if (SPIFFS.begin()) {
-    Serial.println("mounted file system");
+    DPRINTLN("mounted file system");
     if (SPIFFS.exists("/config.json")) {
       //file exists, reading and loading
-      Serial.println("reading config file");
+      DPRINTLN("reading config file");
       File configFile = SPIFFS.open("/config.json", "r");
       if (configFile) {
-        Serial.println("opened config file");
+        DPRINTLN("opened config file");
         size_t size = configFile.size();
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
@@ -77,18 +85,18 @@ void setup() {
         JsonObject& json = jsonBuffer.parseObject(buf.get());
         json.printTo(Serial);
         if (json.success()) {
-          Serial.println("\nparsed json");
+          DPRINTLN("\nparsed json");
 
           find_server = json["find_server"].asString();
           find_group = json["find_group"].asString();
         } else {
-          Serial.println("failed to load json config");
+          DPRINTLN("failed to load json config");
         }
         configFile.close();
       }
     }
   } else {
-    Serial.println("failed to mount FS");
+    DPRINTLN("failed to mount FS");
   }
 
   WiFiManagerParameter custom_find_server("server", "find server", find_server.c_str(), 40);
@@ -108,7 +116,7 @@ void setup() {
 
   //save the custom parameters to FS
   if (shouldSaveConfig) {
-    Serial.println("saving config");
+    DPRINTLN("saving config");
     DynamicJsonBuffer jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
     json["find_server"] = find_server;
@@ -116,10 +124,11 @@ void setup() {
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile) {
-      Serial.println("failed to open config file for writing");
+      DPRINTLN("failed to open config file for writing");
     }
-
+#ifdef DEBUG
     json.printTo(Serial);
+#endif
     json.printTo(configFile);
     configFile.close();
     //end save
@@ -129,11 +138,11 @@ void setup() {
   WiFi.begin(WIFI_SSID, WIFI_PSK);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    DPRINT(".");
   }
-  Serial.println("");
-  Serial.println(F("WiFi connected"));
-  Serial.println(WiFi.localIP());
+  DPRINTLN("");
+  DPRINTLN("WiFi connected");
+  DPRINTLN(WiFi.localIP());
 #endif
 
 #ifdef WIFI_QUICK
@@ -158,12 +167,12 @@ void loop() {
       wifi_promiscuous_enable(disable);
       enableWifiClient();
       enableWifiMonitorMode();
-      Serial.print("Free heap: ");
-      Serial.println(ESP.getFreeHeap());
-      Serial.print("Heap framentation: ");
-      Serial.println(ESP.getHeapFragmentation());
+      DPRINT("Free heap: ");
+      DPRINTLN(ESP.getFreeHeap());
+      DPRINT("Heap framentation: ");
+      DPRINTLN(ESP.getHeapFragmentation());
     } else {
-      Serial.println(F("Haven't found enough clients to send, continuing monitor mode."));
+      DPRINTLN("Haven't found enough clients to send, continuing monitor mode.");
     }
 
     previousMillis = millis();
@@ -180,7 +189,7 @@ void loop() {
 #ifdef WIFIMANAGER
 //callback notifying us of the need to save config
 void saveConfigCallback () {
-  Serial.println("Should save config");
+  DPRINTLN("Should save config");
   shouldSaveConfig = true;
 }
 #endif
@@ -188,7 +197,7 @@ void saveConfigCallback () {
 void enableWifiMonitorMode()
 {
   // Send ESP into promiscuous mode. At this point, it stops being able to connect to the internet
-  Serial.println(F("Turning on wifi monitoring."));
+  DPRINTLN("Turning on wifi monitoring.");
   wifi_set_opmode(STATION_MODE);            // Promiscuous works only with station mode
   wifi_set_channel(channel);
   wifi_promiscuous_enable(enable);
@@ -197,7 +206,7 @@ void enableWifiMonitorMode()
 void enableWifiClient()
 {
   // Send ESP into promiscuous mode. At this point, it stops being able to connect to the internet
-  Serial.println(F("Turning off wifi monitoring."));
+  DPRINTLN("Turning off wifi monitoring.");
   wifi_promiscuous_enable(false);
   WiFi.mode(WIFI_STA);
 #ifdef WIFI_QUICK
@@ -209,11 +218,11 @@ void enableWifiClient()
 #endif
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    DPRINT(".");
   }
-  Serial.println("");
-  Serial.println(F("WiFi connected"));
-  Serial.println(WiFi.localIP());
+  DPRINTLN("");
+  DPRINTLN("WiFi connected");
+  DPRINTLN(WiFi.localIP());
 #ifdef FIND_VERSION
   FindPassive findPassive = FindPassive(find_server, find_group, FIND_VERSION);
 #else
