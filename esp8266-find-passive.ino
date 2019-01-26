@@ -160,11 +160,13 @@ void loop() {
       enableWifiMonitorMode();
       Serial.print("Free heap: ");
       Serial.println(ESP.getFreeHeap());
+      Serial.print("Heap framentation: ");
+      Serial.println(ESP.getHeapFragmentation());
     } else {
       Serial.println(F("Haven't found enough clients to send, continuing monitor mode."));
     }
 
-    previousMillis = currentMillis;
+    previousMillis = millis();
   } else {
     unsigned long newchannel = ((currentMillis - previousMillis) / intmult) + 1;
     if (newchannel != channel) {
